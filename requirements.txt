@@ -1,0 +1,6 @@
+google-genai
+pandas
+psycopg2-binary
+rich
+sqlalchemy
+python-dotenv
