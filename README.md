@@ -101,6 +101,33 @@ Run the demo script to interact with the agent:
 python demo.py
 ```
 
+---
+
+### Streamlit Web UI
+
+You can also interact with the Security Incidents AI Query Agent using a modern web interface powered by Streamlit.
+
+#### Launch the Streamlit App
+
+```bash
+streamlit run streamlit_app.py
+```
+
+#### Features
+- **Chat-based interface**: Ask questions about your security incidents database in natural language.
+- **Example queries**: The UI suggests sample queries to help you get started.
+- **Conversation history**: See your previous questions and the agent's responses in a chat format.
+- **Technical details**: Expandable sections show the underlying SQL and debug logs for transparency.
+- **Error handling**: Friendly error messages if the database or API is not configured.
+
+#### What to Expect
+- On launch, you'll see a welcome message and example queries.
+- Type your question in the chat input at the bottom.
+- The agent will respond with a concise summary and formatted results.
+- You can expand technical details for each response to see how your query was processed.
+
+---
+
 ### Example Queries
 
 The agent can handle a wide range of natural language queries, such as:
