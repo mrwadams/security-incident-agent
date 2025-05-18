@@ -87,8 +87,21 @@ class DatabaseConnector:
             self.engine = None # Reset engine on failure
             return False
             
+    def _is_safe_select_query(self, sql: str) -> bool:
+        """Return True if the SQL is a single SELECT statement (no DML/DDL)."""
+        # Remove leading/trailing whitespace and comments
+        stripped = sql.strip().lower()
+        # Remove SQL comments (simple -- and /* */)
+        import re
+        stripped = re.sub(r"(--.*?$)|(/\*.*?\*/)", "", stripped, flags=re.MULTILINE|re.DOTALL).strip()
+        # Only allow queries that start with 'select'
+        return stripped.startswith("select")
+
     def execute_query(self, sql: str) -> pd.DataFrame:
         """Execute SQL query and return results as DataFrame."""
+        if not self._is_safe_select_query(sql):
+            print("Blocked non-SELECT or unsafe SQL query.")
+            return pd.DataFrame()
         try:
             if self.engine is None:
                 self.connect()
