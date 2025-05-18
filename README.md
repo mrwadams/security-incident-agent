@@ -1,30 +1,32 @@
 # Security Incidents AI Query Agent
 
-An AI agent that enables security analysts to query a PostgreSQL database of security incidents using natural language. This solution leverages Google's Vertex AI with the Gemini model to translate natural language queries into SQL, execute them, and return formatted responses.
+An AI agent that enables security analysts to query a PostgreSQL database of security incidents using natural language. This solution leverages Google's Gemini API to translate natural language queries into SQL, execute them, and return formatted responses.
 
 ## Architecture Overview
 
 This solution consists of the following components:
 
-1. **AI Query Engine**: Uses Vertex AI's Gemini model for natural language understanding and SQL generation
+1. **AI Query Engine**: Uses Gemini API for natural language understanding and SQL generation
 2. **Function Calling Interface**: Defines custom functions for Gemini to invoke for database operations
 3. **Database Connector**: Handles communication with the PostgreSQL database
 4. **Response Formatter**: Formats the query results into human-readable responses
 
 ---
 
-### Architecture Diagram
+### Sequence Diagram
+
+![Sequence Diagram](assets/images/sequence_diagram.png)
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant CLI as CLI / Demo Script
+    participant UI as CLI / Streamlit Web UI
     participant Agent as Security Incidents AI Agent
     participant Gemini as Gemini LLM (Vertex AI)
     participant DB as PostgreSQL Database
 
-    User->>CLI: Enter natural language query
-    CLI->>Agent: Passes query
+    User->>UI: Enter natural language query
+    UI->>Agent: Passes query
     Agent->>Gemini: Sends prompt & context
     Gemini->>Agent: Function call (get_security_incidents_schema)
     Agent->>DB: SQL query (schema)
@@ -35,8 +37,8 @@ sequenceDiagram
     DB-->>Agent: Query results
     Agent->>Gemini: Returns query results
     Gemini->>Agent: AI response (final answer)
-    Agent->>CLI: Formatted response
-    CLI->>User: Display answer
+    Agent->>UI: Formatted response
+    UI->>User: Display answer
 ```
 
 ---
@@ -52,9 +54,8 @@ sequenceDiagram
 ## Requirements
 
 - Python 3.9+
-- Google Cloud project with Vertex AI API enabled
+- Gemini API key from Google AI Studio (https://aistudio.google.com/app/apikey)
 - PostgreSQL database (version 11+)
-- Service account with appropriate permissions
 
 ## Installation
 
@@ -142,7 +143,7 @@ The agent can handle a wide range of natural language queries, such as:
 
 ### 1. Natural Language Processing
 
-When a user submits a query in natural language, the agent sends it to the Vertex AI Gemini model with specific system instructions that help guide the model to understand security-related terminology and context.
+When a user submits a query in natural language, the agent sends it to the Gemini API with specific system instructions that help guide the model to understand security-related terminology and context.
 
 ### 2. Function Calling
 
@@ -194,4 +195,3 @@ class SecurityIncidentsAgent:
 ### System Instructions
 
 You can customize the system instructions provided to the model by editing the `SYSTEM_INSTRUCTION` class attribute within the `SecurityIncidentsAgent` class in `app.py`.
-```
