@@ -61,7 +61,7 @@ sequenceDiagram
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/security-incidents-ai-agent
+git clone https://github.com/mrwadams/security-incidents-ai-agent
 cd security-incidents-ai-agent
 ```
 
