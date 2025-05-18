@@ -183,6 +183,7 @@ When writing SQL:
 - Add appropriate WHERE clauses to filter data.
 - Add ORDER BY for sorting if needed.
 - Use appropriate JOINs if needed to connect with other tables.
+- Use **PostgreSQL SQL syntax for all queries**. For date calculations, use expressions like NOW() - INTERVAL '30 days'. Do NOT use SQLite syntax such as date('now', '-30 days').
 
 Respond in a professional and helpful manner suitable for security analysts.
 """
@@ -215,29 +216,36 @@ Respond in a professional and helpful manner suitable for security analysts.
             config=config
         )
 
-    def handle_function_call(self, function_call: types.FunctionCall):
-        """Handle function calls from Gemini."""
+    def handle_function_call(self, function_call: types.FunctionCall, debug_log=None):
+        if debug_log is None:
+            debug_log = []
         function_name = function_call.name
         function_args = dict(function_call.args)
-        
         if function_name == "query_security_incidents":
             sql_query = function_args.get("sql_query")
-            print(f"Executing SQL query: {sql_query}")
+            # Post-process SQL to convert common SQLite date patterns to PostgreSQL
+            if sql_query:
+                sql_query = sql_query.replace("date('now', '-30 days')", "NOW() - INTERVAL '30 days'")
+                sql_query = sql_query.replace('date(\'now\', \'-7 days\')', "NOW() - INTERVAL '7 days'")
+                sql_query = sql_query.replace('date(\'now\', \'-1 day\')', "NOW() - INTERVAL '1 day'")
+                sql_query = sql_query.replace('date(\'now\')', 'NOW()')
+            debug_log.append(f"Executing SQL query: {sql_query}")
             results = self.db_connector.execute_query(sql_query)
             return results.to_dict('records')
-        
         elif function_name == "get_security_incidents_schema":
+            debug_log.append("Getting security incidents schema")
             return SECURITY_INCIDENTS_SCHEMA
-        
         else:
+            debug_log.append(f"Unknown function: {function_name}")
             return {"error": f"Unknown function: {function_name}"}
 
     def query(self, user_query: str) -> Dict:
-        """Process a natural language query and return the response."""
+        debug_log = []
         if self.chat is None:
             self.initialize_chat()
+            debug_log.append(f"Initializing Gemini chat: {self.model_name}")
         try:
-            print(f"Sending query to Gemini: {user_query}")
+            debug_log.append(f"Sending query to Gemini: {user_query}")
             response = self.chat.send_message(user_query)
             # Loop: handle function calls until we get a text response
             while response.candidates and response.candidates[0].content.parts:
@@ -245,9 +253,9 @@ Respond in a professional and helpful manner suitable for security analysts.
                 for part in response.candidates[0].content.parts:
                     if hasattr(part, 'function_call') and part.function_call:
                         function_to_call = part.function_call
-                        print(f"Handling function call: {function_to_call.name}")
-                        function_result = self.handle_function_call(function_to_call)
-                        print(f"Sending function result to Gemini for function: {function_to_call.name}")
+                        debug_log.append(f"Handling function call: {function_to_call.name}")
+                        function_result = self.handle_function_call(function_to_call, debug_log)
+                        debug_log.append(f"Sending function result to Gemini for function: {function_to_call.name}")
                         response = self.chat.send_message(
                             types.Part.from_function_response(
                                 name=function_to_call.name,
@@ -261,13 +269,15 @@ Respond in a professional and helpful manner suitable for security analysts.
             final_text = response.text
             return {
                 "response": final_text,
-                "status": "success"
+                "status": "success",
+                "debug_log": debug_log
             }
         except Exception as e:
-            print(f"Error processing query: {str(e)}")
+            debug_log.append(f"Error processing query: {str(e)}")
             return {
                 "response": f"Error processing your query: {str(e)}",
-                "status": "error"
+                "status": "error",
+                "debug_log": debug_log
             }
 
 # Main application
