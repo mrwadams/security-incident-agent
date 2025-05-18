@@ -25,6 +25,16 @@ SAMPLE_QUERIES = [
     "Show me the trend of security incidents by category over the last 6 months"
 ]
 
+
+def format_debug_log(log_lines):
+    formatted = []
+    for line in log_lines:
+        if "error" in line.lower():
+            formatted.append(f"*** {line} ***")
+        else:
+            formatted.append(line)
+    return "\n\n".join(formatted) 
+
 st.set_page_config(
     page_title="Security Incidents AI Query Agent",
     page_icon="🛡️",
@@ -71,8 +81,7 @@ for entry in st.session_state.chat_history:
         if entry["role"] == "ai":
             if entry.get("debug_log"):
                 with st.expander("Show technical details"):
-                    for line in entry["debug_log"]:
-                        st.code(line, language="text")
+                    st.text_area("Debug Log", value=format_debug_log(entry["debug_log"]), height=200)
 
 # --- Chat input at the bottom ---
 placeholder = "Ask a question about security incidents..."
@@ -104,8 +113,7 @@ if user_query:
             st.write(result["response"])
             if result.get("debug_log"):
                 with st.expander("Show technical details"):
-                    for line in result["debug_log"]:
-                        st.code(line, language="text")
+                    st.text_area("Debug Log", value=format_debug_log(result["debug_log"]), height=200)
         else:
             st.error(result["response"])
     # Add agent response to chat history
@@ -113,4 +121,4 @@ if user_query:
         "role": "ai",
         "content": result["response"] if result["status"] == "success" else result["response"],
         "debug_log": result.get("debug_log", [])
-    }) 
+    })
