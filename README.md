@@ -15,8 +15,6 @@ This solution consists of the following components:
 
 ### Sequence Diagram
 
-![Sequence Diagram](assets/images/sequence_diagram.png)
-
 ```mermaid
 sequenceDiagram
     participant User

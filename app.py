@@ -1,23 +1,20 @@
 """
 Security Incidents AI Query Agent
 
-This application uses Vertex AI Gemini to create an AI agent that can:
+This application uses Gemini API to create an AI agent that can:
 1. Understand natural language queries about security incidents
 2. Convert them to SQL queries against a Postgres database
 3. Execute the queries and return formatted responses
 
 Requirements:
-- Google Cloud project with Vertex AI API enabled
+- Gemini API key from Google AI Studio (https://aistudio.google.com/app/apikey)
 - Postgres database with security incidents table
-- Service account with appropriate permissions
 """
 
 import os
-import json
-import psycopg2
 import pandas as pd
 from sqlalchemy import create_engine, text
-from typing import Dict, List, Any, Optional
+from typing import Dict, List
 from dotenv import load_dotenv
 
 # Import the Google AI SDK
